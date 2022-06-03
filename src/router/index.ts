@@ -6,6 +6,7 @@ const routes: Array<RouteRecordRaw> = [
     path: "/",
     name: "home",
     component: HomeView,
+    meta: { isAuth: true, title: "홈" },
   },
   {
     path: "/login",
@@ -15,6 +16,7 @@ const routes: Array<RouteRecordRaw> = [
     // which is lazy-loaded when the route is visited.
     component: () =>
       import(/* webpackChunkName: "about" */ "../views/LoginView.vue"),
+    meta: { isAuth: false, title: "로그인" },
   },
   {
     path: "/sign-up",
@@ -24,12 +26,27 @@ const routes: Array<RouteRecordRaw> = [
     // which is lazy-loaded when the route is visited.
     component: () =>
       import(/* webpackChunkName: "about" */ "../views/SignUpView.vue"),
+    meta: { isAuth: false, title: "회원가입" },
   },
 ];
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
+  scrollBehavior(to, from, savedPosition) {
+    // always scroll to top
+    return { top: 0 };
+  },
+});
+
+router.beforeEach((to, from) => {
+  const token = localStorage.getItem("token");
+
+  if (to.meta.isAuth && !token) {
+    return { name: "login" };
+  }
+
+  return true;
 });
 
 export default router;
